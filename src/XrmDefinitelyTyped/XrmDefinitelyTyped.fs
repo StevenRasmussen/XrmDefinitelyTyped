@@ -46,21 +46,25 @@ type XrmDefinitelyTyped private () =
 
 
   static member GenerateFromCrm(xrmAuth, rSettings, gSettings) =
+    let service = DataRetrieval.connectToCrm xrmAuth
+    XrmDefinitelyTyped.GenerateFromCrm(service, rSettings, gSettings)
+
+
+  static member GenerateFromCrm((service:Microsoft.Xrm.Sdk.IOrganizationService), rSettings, gSettings) =
     #if !DEBUG 
     try
     #endif 
       
-      retrieveRawState xrmAuth rSettings
-      |> generateFromRaw gSettings
-      printfn "\nSuccessfully generated all TypeScript declaration files."
-
+    retrieveRawStateWithService service rSettings
+    |> generateFromRaw gSettings
+    printfn "\nSuccessfully generated all TypeScript declaration files."
+  
     #if !DEBUG
     with ex -> getFirstExceptionMessage ex |> failwithf "\nUnable to generate TypeScript files: %s"
     #endif
 
 
-
-  static member SaveMetadataToFile(xrmAuth, rSettings, ?filePath) =
+  static member SaveMetadataToFile((xrmAuth:XrmAuthentication), rSettings, ?filePath) =
     #if !DEBUG 
     try
     #endif 

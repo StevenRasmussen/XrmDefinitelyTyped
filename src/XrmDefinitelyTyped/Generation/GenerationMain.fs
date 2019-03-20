@@ -9,18 +9,20 @@ open Setup
 open FileGeneration
 
 
-/// Retrieve data from CRM and setup raw state
-let retrieveRawState xrmAuth rSettings =
-  let mainProxy = connectToCrm xrmAuth
-
-  let crmVersion = retrieveCrmVersion mainProxy
+/// Retrieve data from CRM and setup raw state with supplied IOrganizationService
+let retrieveRawStateWithService (service: Microsoft.Xrm.Sdk.IOrganizationService) rSettings =
+  let crmVersion = retrieveCrmVersion service
   let entities = 
-    getFullEntityList rSettings.entities rSettings.solutions mainProxy
+    getFullEntityList rSettings.entities rSettings.solutions service
   let skipInactiveForms = rSettings.skipInactiveForms
       
   // Retrieve data from CRM
-  retrieveCrmData crmVersion entities rSettings.solutions mainProxy skipInactiveForms
+  retrieveCrmData crmVersion entities rSettings.solutions service skipInactiveForms
 
+/// Retrieve data from CRM and setup raw state
+let retrieveRawState xrmAuth rSettings =
+  let service = connectToCrm xrmAuth
+  retrieveRawStateWithService service rSettings
 
 /// Main generator function
 let generateFromRaw gSettings rawState =
